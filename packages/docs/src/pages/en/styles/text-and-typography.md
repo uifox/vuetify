@@ -21,6 +21,8 @@ Control the size and style of text using the Typography helper classes. These va
 
 <example file="text-and-typography/typography" />
 
+### Breakpoints
+
 These classes can be applied to all breakpoints from `xs` to `xl`. When using a base class, `.text-{value}`, it is inferred to be `.text-xs-${value}`.
 
 - `.text-{value}` for `xs`
@@ -41,31 +43,6 @@ The _value_ property is one of:
 - `button`
 - `caption`
 - `overline`
-
-<br>
-
-<alert type="success">
-
-  **TIP**
-
-  In all versions prior to v2.3.0, these classes were one of the following:
-
-  <br>
-
-- `.display-4`
-- `.display-3`
-- `.display-2`
-- `.display-1`
-- `.headline`
-- `.title`
-- `.subtitle-1`
-- `.subtitle-2`
-- `.body-1`
-- `.body-2`
-- `.caption`
-- `.overline`
-
-</alert>
 
 The following example demonstrates how the various sizes would appear at different breakpoints:
 
