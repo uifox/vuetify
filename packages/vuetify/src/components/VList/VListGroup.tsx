@@ -4,10 +4,10 @@ import { VExpandTransition } from '@/components/transitions'
 // Composables
 import { useList } from './list'
 import { makeTagProps } from '@/composables/tag'
-import { useNestedGroup } from '@/composables/nested/nested'
+import { emptyNested, useNestedGroup, VNestedSymbol } from '@/composables/nested/nested'
 
 // Utilities
-import { computed } from 'vue'
+import { computed, defineComponent, provide, Ref } from 'vue'
 import { genericComponent } from '@/util'
 
 // Types
@@ -22,6 +22,16 @@ export type ListGroupActivatorSlot = {
   }
 }
 
+const VListGroupActivator = defineComponent({
+  name: 'VListGroupActivator',
+
+  setup (_, { slots }) {
+    provide(VNestedSymbol, emptyNested)
+
+    return () => slots.default?.()
+  }
+})
+
 export const VListGroup = genericComponent<new <T extends InternalListItem>() => {
   $props: {
     items?: T[]
@@ -34,7 +44,6 @@ export const VListGroup = genericComponent<new <T extends InternalListItem>() =>
   name: 'VListGroup',
 
   props: {
-    value: null,
     collapseIcon: {
       type: String,
       default: '$collapse',
@@ -48,18 +57,17 @@ export const VListGroup = genericComponent<new <T extends InternalListItem>() =>
   },
 
   setup (props, { slots }) {
-    const { isOpen, open } = useNestedGroup(props)
+    const { isOpen, open } = useNestedGroup()
     const list = useList()
 
     const onClick = (e: Event) => {
       open(!isOpen.value, e)
     }
 
-    const activatorProps = computed(() => ({
+    const activatorProps: Ref<ListGroupActivatorSlot['props']> = computed(() => ({
       onClick,
       appendIcon: isOpen.value ? props.collapseIcon : props.expandIcon,
       class: 'v-list-group__header',
-      value: `${props.value}_header`,
     }))
 
     return () => {
@@ -72,7 +80,9 @@ export const VListGroup = genericComponent<new <T extends InternalListItem>() =>
             },
           ]}
         >
-          { slots.activator?.({ props: activatorProps.value }) }
+          <VListGroupActivator>
+            { slots.activator?.({ props: activatorProps.value }) }
+          </VListGroupActivator>
           <VExpandTransition>
             <div class="v-list-group__items" v-show={isOpen.value}>
               { slots.default?.() }

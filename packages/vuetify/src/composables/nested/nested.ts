@@ -3,28 +3,22 @@ import { getUid, propsFactory } from '@/util'
 import { computed, inject, onBeforeUnmount, provide, ref } from 'vue'
 import { multipleOpenStrategy, singleOpenStrategy } from './openStrategies'
 import { classicSelectStrategy, independentSelectStrategy, leafSelectStrategy } from './selectStrategies'
-import { classicActiveStrategy } from './activeStrategies'
 
 // Types
 import type { InjectionKey, Prop, Ref } from 'vue'
 import type { SelectStrategyFn } from './selectStrategies'
 import type { OpenStrategyFn } from './openStrategies'
-import type { ActiveStrategyFn } from './activeStrategies'
 
 export type SelectStrategy = 'single-leaf' | 'leaf' | 'independent' | 'classic' | SelectStrategyFn
 export type OpenStrategy = 'single' | 'multiple' | OpenStrategyFn
-export type ActiveStrategy = 'single' | 'multiple' | ActiveStrategyFn
 
 export interface NestedProps {
   selectStrategy: SelectStrategy | undefined
   openStrategy: OpenStrategy | undefined
-  activeStrategy: ActiveStrategy | undefined
   selected: string[] | undefined
   opened: string[] | undefined
-  active: string[] | undefined
   'onUpdate:selected': ((val: string[]) => void) | undefined
   'onUpdate:opened': ((val: string[]) => void) | undefined
-  'onUpdate:active': ((val: string[]) => void) | undefined
 }
 
 type NestedProvide = {
@@ -33,20 +27,18 @@ type NestedProvide = {
     children: Ref<Map<string, string[]>>
     parents: Ref<Map<string, string>>
     opened: Ref<Set<string>>
-    active: Ref<Set<string>>
     selected: Ref<Map<string, 'on' | 'off' | 'indeterminate'>>
     selectedValues: Ref<string[]>
     register: (id: string, parentId: string | null, isGroup?: boolean) => void
     unregister: (id: string) => void
     open: (id: string, value: boolean, event?: Event) => void
     select: (id: string, value: boolean, event?: Event) => void
-    activate: (id: string, value: boolean, event?: Event) => void
   }
 }
 
-const VNestedSymbol: InjectionKey<NestedProvide> = Symbol.for('vuetify:nested')
+export const VNestedSymbol: InjectionKey<NestedProvide> = Symbol.for('vuetify:nested')
 
-const emptyNested: NestedProvide = {
+export const emptyNested: NestedProvide = {
   id: ref(null),
   root: {
     register: () => null,
@@ -57,8 +49,6 @@ const emptyNested: NestedProvide = {
     select: () => null,
     opened: ref(new Set()),
     selected: ref(new Map()),
-    active: ref(new Set()),
-    activate: () => null,
     selectedValues: ref([]),
   },
 }
@@ -66,10 +56,8 @@ const emptyNested: NestedProvide = {
 export const makeNestedProps = propsFactory({
   selectStrategy: [String, Function] as Prop<SelectStrategy>,
   openStrategy: [String, Function] as Prop<OpenStrategy>,
-  activeStrategy: [String, Function] as Prop<ActiveStrategy>,
   opened: Array as Prop<string[]>,
   selected: Array as Prop<string[]>,
-  active: Array as Prop<string[]>,
 }, 'nested')
 
 export const useNested = (props: NestedProps) => {
@@ -78,18 +66,6 @@ export const useNested = (props: NestedProps) => {
   const parents = ref(new Map<string, string>())
 
   const opened = useProxiedModel(props, 'opened', props.opened, v => new Set(v), v => [...v.values()])
-  const active = useProxiedModel(props, 'active', props.active, v => new Set(v), v => [...v.values()])
-
-  const activeStrategy = computed(() => {
-    if (typeof props.activeStrategy === 'object') return props.activeStrategy
-
-    switch (props.activeStrategy) {
-      case 'single': return classicActiveStrategy(true)
-      case 'multiple':
-      default:
-        return classicActiveStrategy()
-    }
-  })
 
   const selectStrategy = computed(() => {
     if (typeof props.selectStrategy === 'object') return props.selectStrategy
@@ -130,7 +106,6 @@ export const useNested = (props: NestedProps) => {
     root: {
       opened,
       selected,
-      active,
       selectedValues: computed(() => {
         const arr = []
 
@@ -160,7 +135,6 @@ export const useNested = (props: NestedProps) => {
         }
         parents.value.delete(id)
         opened.value.delete(id)
-        active.value.delete(id)
         selected.value.delete(id)
       },
       open: (id, value, event) => {
@@ -187,18 +161,6 @@ export const useNested = (props: NestedProps) => {
 
         newSelected && (selected.value = newSelected)
       },
-      activate: (id, value, event) => {
-        const newActive = activeStrategy.value({
-          id,
-          value,
-          active: new Set(active.value),
-          children: children.value,
-          parents: parents.value,
-          event,
-        })
-
-        newActive && (active.value = newActive)
-      },
       children,
       parents,
     },
@@ -220,8 +182,6 @@ export const useNestedItem = (id: Ref<string | undefined>) => {
     parent: computed(() => parent.root.parents.value.get(computedId.value)),
     select: (selected: boolean, e: Event) => parent.root.select(computedId.value, selected, e),
     isSelected: computed(() => parent.root.selected.value.get(computedId.value) === 'on'),
-    activate: (activated: boolean, e: Event) => parent.root.activate(computedId.value, activated, e),
-    isActive: computed(() => parent.root.active.value.has(computedId.value)),
   }
 
   parent.root.register(computedId.value, parent.id.value, false)
@@ -233,10 +193,10 @@ export const useNestedItem = (id: Ref<string | undefined>) => {
   return item
 }
 
-export const useNestedGroup = (props: { value: string }) => {
+export const useNestedGroup = () => {
   const parent = inject(VNestedSymbol, emptyNested)
 
-  const id = computed(() => props.value ?? getUid().toString())
+  const id = computed(() => getUid().toString())
 
   const group = {
     ...parent,
