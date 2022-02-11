@@ -22,14 +22,15 @@ export interface NestedProps {
 }
 
 type NestedProvide = {
-  id: Ref<string | null>
+  id: Ref<string | undefined>
+  skipRegister?: boolean
   root: {
     children: Ref<Map<string, string[]>>
     parents: Ref<Map<string, string>>
     opened: Ref<Set<string>>
     selected: Ref<Map<string, 'on' | 'off' | 'indeterminate'>>
     selectedValues: Ref<string[]>
-    register: (id: string, parentId: string | null, isGroup?: boolean) => void
+    register: (id: string, parentId: string | undefined, isGroup?: boolean) => void
     unregister: (id: string) => void
     open: (id: string, value: boolean, event?: Event) => void
     select: (id: string, value: boolean, event?: Event) => void
@@ -39,7 +40,7 @@ type NestedProvide = {
 export const VNestedSymbol: InjectionKey<NestedProvide> = Symbol.for('vuetify:nested')
 
 export const emptyNested: NestedProvide = {
-  id: ref(null),
+  id: ref(),
   root: {
     register: () => null,
     unregister: () => null,
@@ -102,7 +103,7 @@ export const useNested = (props: NestedProps) => {
   })
 
   const nested: NestedProvide = {
-    id: ref(null),
+    id: ref(),
     root: {
       opened,
       selected,
@@ -116,6 +117,7 @@ export const useNested = (props: NestedProps) => {
         return arr
       }),
       register: (id, parentId, isGroup) => {
+        console.log('register', id, parentId, isGroup)
         parentId && id !== parentId && parents.value.set(id, parentId)
 
         isGroup && children.value.set(id, [])
@@ -158,7 +160,6 @@ export const useNested = (props: NestedProps) => {
           parents: parents.value,
           event,
         })
-
         newSelected && (selected.value = newSelected)
       },
       children,
@@ -171,7 +172,7 @@ export const useNested = (props: NestedProps) => {
   return nested.root
 }
 
-export const useNestedItem = (id: Ref<string | undefined>) => {
+export const useNestedItem = (id: Ref<string | undefined>, isGroup: boolean) => {
   const parent = inject(VNestedSymbol, emptyNested)
 
   const computedId = computed(() => id.value ?? getUid().toString())
@@ -179,41 +180,53 @@ export const useNestedItem = (id: Ref<string | undefined>) => {
   const item = {
     ...parent,
     id: computedId,
+    open: (open: boolean, e: Event) => parent.root.open(computedId.value, open, e),
+    isOpen: computed(() => parent.root.opened.value.has(computedId.value)),
     parent: computed(() => parent.root.parents.value.get(computedId.value)),
     select: (selected: boolean, e: Event) => parent.root.select(computedId.value, selected, e),
     isSelected: computed(() => parent.root.selected.value.get(computedId.value) === 'on'),
+    isIndeterminate: computed(() => parent.root.selected.value.get(computedId.value) === 'indeterminate'),
   }
 
-  parent.root.register(computedId.value, parent.id.value, false)
+  !parent.skipRegister && parent.root.register(computedId.value, parent.id.value, isGroup)
 
   onBeforeUnmount(() => {
-    parent.root.unregister(computedId.value)
+    !parent.skipRegister && parent.root.unregister(computedId.value)
   })
+
+  isGroup && provide(VNestedSymbol, item)
 
   return item
 }
 
-export const useNestedGroup = () => {
+// export const useNestedGroup = (id: Ref<string | undefined>) => {
+//   const parent = inject(VNestedSymbol, emptyNested)
+
+//   const computedId = computed(() => id.value ?? getUid().toString())
+
+//   const group = {
+//     ...parent,
+//     id: computedId,
+//     open: (open: boolean, e: Event) => parent.root.open(computedId.value, open, e),
+//     isOpen: computed(() => parent.root.opened.value.has(computedId.value)),
+//     select: (selected: boolean, e: Event) => parent.root.select(computedId.value, selected, e),
+//     isSelected: computed(() => parent.root.selected.value.get(computedId.value) === 'on'),
+//     isIndeterminate: computed(() => parent.root.selected.value.get(computedId.value) === 'indeterminate'),
+//   }
+
+//   parent.root.register(computedId.value, parent.id.value, true)
+
+//   onBeforeUnmount(() => {
+//     parent.root.unregister(computedId.value)
+//   })
+
+//   provide(VNestedSymbol, group)
+
+//   return group
+// }
+
+export const useNestedGroupActivator = () => {
   const parent = inject(VNestedSymbol, emptyNested)
 
-  const id = computed(() => getUid().toString())
-
-  const group = {
-    ...parent,
-    id,
-    open: (open: boolean, e: Event) => parent.root.open(id.value, open, e),
-    isOpen: computed(() => parent.root.opened.value.has(id.value)),
-    isSelected: computed(() => parent.root.selected.value.get(id.value) === 'on'),
-    isIndeterminate: computed(() => parent.root.selected.value.get(id.value) === 'indeterminate'),
-  }
-
-  parent.root.register(id.value, parent.id.value, true)
-
-  onBeforeUnmount(() => {
-    parent.root.unregister(id.value)
-  })
-
-  provide(VNestedSymbol, group)
-
-  return group
+  provide(VNestedSymbol, { ...parent, skipRegister: true })
 }

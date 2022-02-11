@@ -4,7 +4,7 @@ import { VExpandTransition } from '@/components/transitions'
 // Composables
 import { useList } from './list'
 import { makeTagProps } from '@/composables/tag'
-import { emptyNested, useNestedGroup, VNestedSymbol } from '@/composables/nested/nested'
+import { emptyNested, useNestedItem, VNestedSymbol } from '@/composables/nested/nested'
 
 // Utilities
 import { computed, defineComponent, provide, Ref } from 'vue'
@@ -52,12 +52,13 @@ export const VListGroup = genericComponent<new <T extends InternalListItem>() =>
       type: String,
       default: '$expand',
     },
+    value: null,
 
     ...makeTagProps(),
   },
 
   setup (props, { slots }) {
-    const { isOpen, open } = useNestedGroup()
+    const { isOpen, open } = useNestedItem(computed(() => props.value), true)
     const list = useList()
 
     const onClick = (e: Event) => {

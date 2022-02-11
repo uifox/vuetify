@@ -1,0 +1,16 @@
+@use 'sass:math'
+// @forward './variables'
+@use 'sass:map'
+@use '../../styles/settings'
+@use '../../styles/tools'
+// @use './mixins' as *
+// @use './variables' as *
+
+.v-treeview-item
+  &__label
+    display: flex
+    align-items: center
+
+.v-treeview-item:not(.v-treeview-group__header)
+  padding-inline-start: calc(#{0px} + var(--indent-padding) + #{40px} + #{16px}) !important
+
