@@ -186,6 +186,7 @@ export const useNestedItem = (id: Ref<string | undefined>, isGroup: boolean) => 
     select: (selected: boolean, e: Event) => parent.root.select(computedId.value, selected, e),
     isSelected: computed(() => parent.root.selected.value.get(computedId.value) === 'on'),
     isIndeterminate: computed(() => parent.root.selected.value.get(computedId.value) === 'indeterminate'),
+    isLeaf: computed(() => (parent.root.children.value.get(computedId.value)?.length ?? 0) <= 0),
   }
 
   !parent.skipRegister && parent.root.register(computedId.value, parent.id.value, isGroup)

@@ -1,16 +1,39 @@
 @use 'sass:math'
-// @forward './variables'
+@forward './variables'
 @use 'sass:map'
+@use 'sass:list'
 @use '../../styles/settings'
 @use '../../styles/tools'
-// @use './mixins' as *
-// @use './variables' as *
+@use './variables' as *
 
 .v-treeview-item
-  &__label
+  &__content
     display: flex
     align-items: center
 
-.v-treeview-item:not(.v-treeview-group__header)
-  padding-inline-start: calc(#{0px} + var(--indent-padding) + #{40px} + #{16px}) !important
+  &__label
+    display: flex
+    align-items: center
+    padding-inline-start: 8px
 
+  &__prepend
+    min-width: 40px
+    display: flex
+    justify-content: center
+
+$base-padding: list.nth($treeview-item-padding, 2)
+.v-treeview
+  --indent-padding: 0px
+
+.v-treeview-group
+  --parent-padding: var(--indent-padding)
+
+.v-treeview-group__items
+  --indent-padding: calc(var(--parent-padding) + #{$treeview-indent-size})
+
+.v-treeview-group__items .v-treeview-item
+  padding-inline-start: calc(#{$base-padding} + var(--indent-padding)) !important
+
+.v-treeview-item--prepend,
+.v-treeview-group__items .v-treeview-item--prepend
+  padding-inline-start: calc(#{$base-padding} + var(--indent-padding) + #{$treeview-item-checkbox-size}) !important

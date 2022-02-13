@@ -1,18 +1,26 @@
+import './VTreeview.sass'
+
+// Components
+import { VTreeviewChildren } from './VTreeviewChildren'
+
+// Composables
 import { makeNestedProps, useNested } from '@/composables/nested/nested'
 import { makeTagProps } from '@/composables/tag'
+import { makeDensityProps, useDensity } from '@/composables/density'
+
+// Utilities
+import { computed } from 'vue'
 import { defineComponent, useRender } from '@/util'
-import { computed, PropType } from 'vue'
-import { VTreeviewChildren } from './VTreeviewChildren'
-import { makeDensityProps, useDensity } from "@/composables/density";
+
+// Types
+import type { PropType } from 'vue'
 
 export type TreeviewItem = {
   [key: string]: any
-  // $type?: 'item' | 'subheader' | 'divider'
   $children?: (string | TreeviewItem)[]
 }
 
 export type InternalTreeviewItem = {
-  // type?: 'item' | 'subheader' | 'divider'
   props?: Record<string, any>
   children?: InternalTreeviewItem[]
 }
@@ -21,14 +29,11 @@ const parseItems = (items?: (string | TreeviewItem)[]): InternalTreeviewItem[] |
   if (!items) return undefined
 
   return items.map(item => {
-    if (typeof item === 'string') return { type: 'item', value: item, title: item }
+    if (typeof item === 'string') return { value: item, title: item }
 
-    const { $type, $children, ...props } = item
+    const { $children, ...props } = item
 
-    // if ($type === 'subheader') return { type: 'subheader', props }
-    // if ($type === 'divider') return { type: 'divider', props }
-
-    return { type: 'item', props, children: parseItems($children) }
+    return { props, children: parseItems($children) }
   })
 }
 
@@ -57,15 +62,16 @@ export const VTreeview = defineComponent({
       <props.tag
         class={[
           'v-treeview',
-          'v-list',
           densityClasses.value,
         ]}
       >
-        <VTreeviewChildren items={ items.value }>
-          {{
-            default: slots.default,
-          }}
-        </VTreeviewChildren>
+        { slots.default?.() ?? (
+          <VTreeviewChildren items={ items.value }>
+            {{
+              default: slots.default,
+            }}
+          </VTreeviewChildren>
+        ) }
       </props.tag>
     ))
 
@@ -73,5 +79,5 @@ export const VTreeview = defineComponent({
       open,
       select,
     }
-  }
+  },
 })

@@ -32,10 +32,10 @@ export const makeCheckboxProps = propsFactory({
 }, 'checkbox')
 
 export const useCheckbox = (props: {
-  indeterminate?: boolean,
-  'onUpdate:indeterminate': ((val: any) => void) | undefined,
-  indeterminateIcon: string,
-  falseIcon: string,
+  indeterminate?: boolean
+  'onUpdate:indeterminate': ((val: any) => void) | undefined
+  indeterminateIcon: string
+  falseIcon: string
   trueIcon: string
 }) => {
   const indeterminate = useProxiedModel(props, 'indeterminate')

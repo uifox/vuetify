@@ -15,18 +15,15 @@ import { makeDensityProps, useDensity } from '@/composables/density'
 import { makeDimensionProps, useDimension } from '@/composables/dimensions'
 import { makeElevationProps, useElevation } from '@/composables/elevation'
 import { makeRoundedProps, useRounded } from '@/composables/rounded'
-import { makeRouterProps, useLink } from '@/composables/router'
 import { makeTagProps } from '@/composables/tag'
 import { makeThemeProps, provideTheme } from '@/composables/theme'
-import { useList } from './list'
 
 // Directives
 import { Ripple } from '@/directives/ripple'
 
 // Utilities
-import { computed, onMounted } from 'vue'
-import { consoleError, genericComponent } from '@/util'
-import { useNestedItem } from '@/composables/nested/nested'
+import { computed } from 'vue'
+import { genericComponent } from '@/util'
 
 // Types
 import type { MakeSlots } from '@/util'

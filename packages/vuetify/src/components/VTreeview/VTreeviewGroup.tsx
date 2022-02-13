@@ -4,21 +4,22 @@ import { VExpandTransition } from '@/components/transitions'
 // Composables
 // import { useList } from './list'
 import { makeTagProps } from '@/composables/tag'
-import { emptyNested, useNestedItem, useNestedGroupActivator, VNestedSymbol } from '@/composables/nested/nested'
+import { useNestedGroupActivator, useNestedItem } from '@/composables/nested/nested'
 
 // Utilities
-import { computed, defineComponent, provide, Ref } from 'vue'
+import type { Ref } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { genericComponent } from '@/util'
 
 // Types
 import type { MakeSlots } from '@/util'
-import { InternalTreeviewItem } from './VTreeview'
-import { useList } from '../VList/list'
+import type { InternalTreeviewItem } from './VTreeview'
 
-export type ListGroupActivatorSlot = {
+export type TreeviewGroupActivatorSlot = {
   props: {
     'onClick:prepend': (e: Event) => void
-    prependIcon: string
+    collapseIcon: string
+    expandIcon: string
     class: string
   }
 }
@@ -30,9 +31,8 @@ const VTreeviewGroupActivator = defineComponent({
     useNestedGroupActivator()
 
     return () => slots.default?.()
-  }
+  },
 })
-
 
 export const VTreeviewGroup = genericComponent<new <T extends InternalTreeviewItem>() => {
   $props: {
@@ -64,11 +64,11 @@ export const VTreeviewGroup = genericComponent<new <T extends InternalTreeviewIt
 
   setup (props, { slots }) {
     const { isOpen, open, id } = useNestedItem(computed(() => props.value), true)
-    const list = useList()
 
     const activatorProps: Ref<ListGroupActivatorSlot['props']> = computed(() => ({
       'onClick:prepend': (e: Event) => open(!isOpen.value, e),
-      prependIcon: isOpen.value ? props.collapseIcon : props.expandIcon,
+      collapseIcon: props.collapseIcon,
+      expandIcon: props.expandIcon,
       class: 'v-treeview-group__header',
       value: id.value,
     }))
@@ -77,17 +77,14 @@ export const VTreeviewGroup = genericComponent<new <T extends InternalTreeviewIt
       return (
         <props.tag
           class={[
-            'v-list-group',
-            {
-              'v-list-group--prepend': false,
-            },
+            'v-treeview-group',
           ]}
         >
           <VTreeviewGroupActivator>
             { slots.activator?.({ props: activatorProps.value }) }
           </VTreeviewGroupActivator>
-          <div class="v-list-group__items">
-            { isOpen.value && slots.default?.() }
+          <div class="v-treeview-group__items" v-show={ isOpen.value }>
+            { slots.default?.() }
           </div>
         </props.tag>
       )

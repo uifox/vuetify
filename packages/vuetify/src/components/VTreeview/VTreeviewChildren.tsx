@@ -1,4 +1,6 @@
 // Components
+import { VTreeviewGroup } from './VTreeviewGroup'
+import { VTreeviewItem } from './VTreeviewItem'
 
 // Utilities
 import { genericComponent } from '@/util'
@@ -6,18 +8,16 @@ import { genericComponent } from '@/util'
 // Types
 import type { MakeSlots } from '@/util'
 import type { Prop } from 'vue'
-import { VTreeviewGroup } from './VTreeviewGroup'
-import { VTreeviewItem } from './VTreeviewItem'
-import { InternalTreeviewItem } from './VTreeview'
-import { createList } from '../VList/list'
+import type { InternalTreeviewItem } from './VTreeview'
+import type { TreeviewGroupActivatorSlot } from './VTreeviewGroup'
 
 export const VTreeviewChildren = genericComponent<new <T extends InternalTreeviewItem>() => {
   $props: {
     items?: T[]
   }
   $slots: MakeSlots<{
-    default: []
-    // header: [ListGroupActivatorSlot]
+    // default: []
+    header: [TreeviewGroupActivatorSlot]
     item: [T]
     // title: [ListItemTitleSlot]
     // subtitle: [ListItemSubtitleSlot]
@@ -30,8 +30,6 @@ export const VTreeviewChildren = genericComponent<new <T extends InternalTreevie
   },
 
   setup (props, { slots }) {
-    createList()
-
     return () => slots.default?.() ?? props.items?.map(({ children, props: itemProps }) => {
       return children ? (
         <VTreeviewGroup

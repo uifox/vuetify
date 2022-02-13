@@ -1,23 +1,16 @@
 // Styles
 import './VListItem.sass'
 
-// Components
-import { VAvatar } from '@/components/VAvatar'
-import { VListItemAvatar } from './VListItemAvatar'
-import { VListItemHeader } from './VListItemHeader'
-import { VListItemSubtitle } from './VListItemSubtitle'
-import { VListItemTitle } from './VListItemTitle'
-
 // Composables
-import { genOverlays, makeVariantProps, useVariant } from '@/composables/variant'
-import { makeBorderProps, useBorder } from '@/composables/border'
-import { makeDensityProps, useDensity } from '@/composables/density'
-import { makeDimensionProps, useDimension } from '@/composables/dimensions'
-import { makeElevationProps, useElevation } from '@/composables/elevation'
-import { makeRoundedProps, useRounded } from '@/composables/rounded'
+import { makeVariantProps } from '@/composables/variant'
+import { makeBorderProps } from '@/composables/border'
+import { makeDensityProps } from '@/composables/density'
+import { makeDimensionProps } from '@/composables/dimensions'
+import { makeElevationProps } from '@/composables/elevation'
+import { makeRoundedProps } from '@/composables/rounded'
 import { makeRouterProps, useLink } from '@/composables/router'
 import { makeTagProps } from '@/composables/tag'
-import { makeThemeProps, provideTheme } from '@/composables/theme'
+import { makeThemeProps } from '@/composables/theme'
 import { useList } from './list'
 
 // Directives
@@ -109,6 +102,7 @@ export const VListItem = genericComponent<new () => {
 
     return () => {
       const hasPrepend = !!(slots.prepend || props.prependAvatar || props.prependIcon)
+
       list?.updateHasPrepend(hasPrepend)
 
       return (
@@ -117,10 +111,13 @@ export const VListItem = genericComponent<new () => {
           active={ isActive.value }
           href={ link.href.value }
           link={ isClickable.value }
-          onClick={ isClickable && ((e: MouseEvent) => {
+          onClick={ isClickable.value && ((e: MouseEvent) => {
             link.navigate?.(e)
             select(!isSelected.value, e)
           })}
+          class={{
+            'v-list-item--prepend': !hasPrepend && list?.hasPrepend.value,
+          }}
         >
           {{
             ...slots,
