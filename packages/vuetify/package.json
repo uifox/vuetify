@@ -1,6 +1,6 @@
 {
-  "name": "vuetify",
-  "description": "Vue Material Component Framework",
+  "name": "@uifox-at-doxo/vuetify",
+  "description": "Vue Material Component Framework customized for doxo",
   "version": "2.6.3",
   "author": {
     "name": "John Leider",
@@ -10,7 +10,7 @@
   "homepage": "https://vuetifyjs.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuetifyjs/vuetify.git",
+    "url": "git+https://github.com/uifox/vuetify.git",
     "directory": "packages/vuetify"
   },
   "keywords": [
