@@ -1,5 +1,5 @@
 // Styles
-// import '../../styles/main.sass'
+import '../../styles/main.sass'
 
 // Locale
 import { en } from '../../locale'

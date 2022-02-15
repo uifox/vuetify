@@ -1,7 +1,7 @@
 {
   "name": "@uifox-at-doxo/vuetify",
   "description": "Vue Material Component Framework customized for doxo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "John Leider",
     "email": "john@vuetifyjs.com"
